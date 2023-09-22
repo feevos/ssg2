@@ -1,5 +1,8 @@
 # SSG2: A New Modelling Paradigm for Semantic Segmentation
 
+## Coming soon ...    
+
+![coming soon ...](.images/ssg2_overview.png)
 
 ![coming soon ...](.images/ssg2_animation.gif)
 
