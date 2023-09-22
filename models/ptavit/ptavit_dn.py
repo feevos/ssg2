@@ -1,6 +1,6 @@
 import torch
-from ssg2.models.unet.ptavit_dn_features   import * 
-from ssg2.models.unet.head_cmtsk           import * 
+from ssg2.models.ptavit.ptavit_dn_features   import * 
+from ssg2.models.heads.head_cmtsk           import * 
 
 
 

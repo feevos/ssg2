@@ -1,28 +1,15 @@
 import torch
-from ssg2.models.head.head_cmtsk import * 
+from ssg2.models.heads.head_cmtsk import * 
+from ssg2.models.ptavitssg2.ptavit3d   import PTAViTStage3D_no_down
 
-from ssg2.models.ssg2.ptavit3d   import MaxVitStage3D_no_down
-
-from trchprosthesis.nn.layers.scale import *
-from trchprosthesis.experimental.nn.layers.patchattention import  PatchAttention2D
-from trchprosthesis.nn.activations.sigmoid_crisp import *
-from trchprosthesis.nn.layers.conv2Dnormed import *
 
 
 
 __all__ = ['head_cmtsk_3D']
 
 
-
-
-
-# Need correlation in time, so need custom attention that does Time x Time comparison 
-#from trchprosthesis.experimental.nn.units.maxvit_fd import MaxVitStage_no_down
-
-# In this version I add attention on the total of least of features, and then I consume them with head_lstm 
-from ptavit3d import PTAViTStage3D_no_down
 class head_cmtsk_3D(torch.nn.Module):
-    def __init__(self, nfilters, NClasses, spatial_size=256, norm_type = 'GroupNorm', norm_groups=4, segm_act ='sigmoid', nresblocks=2):
+    def __init__(self, nfilters, NClasses, spatial_size=256, scales=(4,8), norm_type = 'GroupNorm', norm_groups=4, segm_act ='sigmoid', nblocks3D=2):
         super().__init__()
         # TODO: Not sure if I should detach features before inserting to the lstm, in order to train separately or not
         # Different heads decouple the features interpetation, the ones created by the convlstmcell
@@ -30,23 +17,23 @@ class head_cmtsk_3D(torch.nn.Module):
 
         self.NClasses = NClasses
 
-        self.head_inters = head_cmtsk(nfilters, NClasses, norm_type, norm_groups,representation, segm_act)
-        self.head_unions = head_cmtsk(nfilters, NClasses, norm_type, norm_groups,representation, segm_act)
-        self.head_diffs  = head_cmtsk(nfilters, NClasses, norm_type, norm_groups,representation, segm_act)
+        self.head_inters = head_cmtsk(nfilters=nfilters, NClasses=NClasses, spatial_size=spatial_size, scales=scales, norm_type=norm_type, norm_groups=norm_groups, segm_act=segm_act)
+        self.head_unions = head_cmtsk(nfilters=nfilters, NClasses=NClasses, spatial_size=spatial_size, scales=scales, norm_type=norm_type, norm_groups=norm_groups, segm_act=segm_act)
+        self.head_diffs = head_cmtsk(nfilters=nfilters, NClasses=NClasses, spatial_size=spatial_size, scales=scales, norm_type=norm_type, norm_groups=norm_groups, segm_act=segm_act)
 
         self.compressor   = torch.nn.Conv2d((nfilters+2*3*NClasses),nfilters,kernel_size=1,bias=False)
-        self.head_target = head_cmtsk(nfilters, NClasses, norm_type, norm_groups,representation, segm_act)
+        self.head_target = head_cmtsk(nfilters=nfilters, NClasses=NClasses, spatial_size=spatial_size, scales=scales, norm_type=norm_type, norm_groups=norm_groups, segm_act=segm_act)
 
         # This is not a nice solution, because I need cross spatial attention. The FracTAL cannot do cross spatial, but is good for prototyping
         scales = 16//(256//spatial_size)
         scales = (scales,scales) # These are spatial only 
         
-        self.conv_sequence = MaxVitStage3D_no_down(
+        self.conv_sequence = PTAViTStage3D_no_down(
                         layer_dim_in=nfilters,
                         layer_dim=nfilters,
-                        layer_depth = nresblocks,
+                        layer_depth = nblocks3D,
                         nheads=nfilters//4,
-                        scales=scales)
+                        scales=scales) 
 
     #   Fuzzy set intersection 
     def fz_tnorm(self, x,y,p=1.e-5):
@@ -61,7 +48,6 @@ class head_cmtsk_3D(torch.nn.Module):
 
     # During inference we can avoid calculating some layers, for faster and more memory efficient operation. 
     def forward_inference(self, lst_of_features):
-        lst_of_features = lst_of_features.permute(0,2,1,3,4).contiguous()
         b,c,n,h,w = lst_of_features.shape
         
         outs_inter          = []
@@ -103,7 +89,6 @@ class head_cmtsk_3D(torch.nn.Module):
 
 
     def forward(self, lst_of_features):
-        lst_of_features = lst_of_features.permute(0,2,1,3,4).contiguous()
         b,c,n,h,w = lst_of_features.shape
         
         outs_inter          = []
@@ -155,7 +140,7 @@ class head_cmtsk_3D(torch.nn.Module):
 
 
         preds_target = self.head_target(features_target)
-        #return outs_inter, outs_union,  preds_target 
+        
         return outs_inter, outs_union, outs_diffs, preds_target, outs_target_fz,  outs_null_fz, out3d2d
         
 

@@ -1,7 +1,7 @@
 import torch
 from ssg2.utils.get_norm import * 
 from ssg2.nn.layers.conv2Dnormed import * 
-from ssg2.nn.layers.patchattention import * 
+from ssg2.nn.layers.ptattention import * 
 
 
 class FusionV2(torch.nn.Module):

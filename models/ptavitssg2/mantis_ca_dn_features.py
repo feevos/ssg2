@@ -2,8 +2,8 @@ import torch
 import numpy as np
 
 from ssg2.nn.layers.conv2Dnormed import *
-from ssg2.nn.layers.patchfusion import  FusionV2  
-from ssg2.nn.layers.patchattention import  *  
+from ssg2.nn.layers.patchfusion import  *
+from ssg2.nn.layers.ptattention import  *  
 from ssg2.nn.layers.scale import *
 from ssg2.nn.layers.combine import *
 from ssg2.nn.units.ptavit import *
@@ -26,23 +26,18 @@ class FusionCAT(torch.nn.Module):
 
 class FuseHiLo(torch.nn.Module):
     # BC: Balanced (features) Crisp (boundaries) 
-    def __init__(self, nfilters, nfilters_embed=32, spatial_size=256,scales=(4,8),   norm_type = 'BatchNorm', norm_groups=None):
+    def __init__(self, nfilters, spatial_size=256,scales=(4,8),   norm_type = 'BatchNorm', norm_groups=None):
         super().__init__()
-        
 
+        self.embedding1 = Conv2DNormed(in_channels = nfilters, out_channels = nfilters, kernel_size = 1, padding=0, norm_type=norm_type, num_groups=norm_groups)
+        self.embedding2 = Conv2DNormed(in_channels = nfilters, out_channels = nfilters, kernel_size = 1, padding=0, norm_type=norm_type, num_groups=norm_groups)
 
-        self.embedding1 = Conv2DNormed(in_channels = nfilters, out_channels = nfilters_embed, kernel_size = 1, padding=0, norm_type=norm_type, num_groups=norm_groups)
-        self.embedding2 = Conv2DNormed(in_channels = nfilters, out_channels = nfilters_embed, kernel_size = 1, padding=0, norm_type=norm_type, num_groups=norm_groups)
+        self.upscale = UpSample2D(in_channels=nfilters,out_channels=nfilters,scale_factor=4,norm_type=norm_type,norm_groups=norm_groups)
 
-
-        self.upscale = UpSample2D(in_channels=nfilters_embed,out_channels=nfilters_embed,scale_factor=4,norm_type=norm_type,norm_groups=norm_groups)
-
-
-        self.conv2d = Conv2DNormed(in_channels=nfilters_embed*2, out_channels = nfilters_embed,kernel_size =1, norm_type=norm_type, num_groups=norm_groups)
-        self.att = PatchAttention2D( in_channels=nfilters_embed, out_channels = nfilters_embed,nheads=nfilters_embed//4,norm=norm_type,norm_groups=norm_groups,
+        self.conv2d = Conv2DNormed(in_channels=nfilters*2, out_channels = nfilters,kernel_size =1, norm_type=norm_type, num_groups=norm_groups)
+        self.att = PatchAttention2D( in_channels=nfilters, out_channels = nfilters,nheads=nfilters//4,norm=norm_type,norm_groups=norm_groups,
                 spatial_size=spatial_size,
                 scales=scales,
-                metric_learning=False,
                 correlation_method='linear')
 
 
@@ -71,7 +66,7 @@ class FuseHiLo(torch.nn.Module):
 
 class mantis_ca_dn_features(torch.nn.Module):
     # This is a modification of the mantis architecture, developed in Diakogiannis et al 2021 https://www.mdpi.com/2072-4292/13/18/3707
-    def __init__(self,  in_channels, spatial_size_init, nfilters_init=96, nfilters_embed=32, nheads_start=96//4, depths=[2,2,5,2], verbose=True, norm_type='GroupNorm', norm_groups=4, correlation_method='linear'):
+    def __init__(self,  in_channels, spatial_size_init, nfilters_init=96, nheads_start=96//4, depths=[2,2,5,2], verbose=True, norm_type='GroupNorm', norm_groups=4, correlation_method='linear'):
         super().__init__()
 
         def closest_power_of_2(num_array):
@@ -95,7 +90,6 @@ class mantis_ca_dn_features(torch.nn.Module):
 
         self.conv1     = Conv2DNormed(in_channels=in_channels, out_channels = nfilters_init, kernel_size=1,padding=0,strides=1, norm_type=norm_type, num_groups=norm_groups)
         self.fuse_first = FusionV2(nfilters_in=nfilters_init, nfilters_out= nfilters_init, spatial_size=spatial_size_init, scales = scales_all[0], 
-                metric_learning=metric_learning,
                 correlation_method=correlation_method,
                 norm=norm_type, norm_groups=norm_groups)
         
@@ -138,7 +132,6 @@ class mantis_ca_dn_features(torch.nn.Module):
                 mbconv_expansion_rate = 4,
                 mbconv_shrinkage_rate = 0.25,
                 dropout = 0.1,
-                metric_learning=metric_learning,
                 correlation_method=correlation_method
                 ))
 
@@ -160,7 +153,6 @@ class mantis_ca_dn_features(torch.nn.Module):
                 norm_groups         =   norm_groups, 
                 spatial_size        =   spatial_size, 
                 scales              =   scales, 
-                metric_learning     =   metric_learning, 
                 correlation_method  =   correlation_method)
                 )
 
@@ -209,7 +201,6 @@ class mantis_ca_dn_features(torch.nn.Module):
                 mbconv_expansion_rate = 4,
                 mbconv_shrinkage_rate = 0.25,
                 dropout = 0.1,
-                metric_learning=metric_learning,
                 correlation_method=correlation_method
                 ))
 
@@ -223,7 +214,7 @@ class mantis_ca_dn_features(torch.nn.Module):
         self.stages_up   = torch.nn.ModuleList(self.stages_up)
         self.UpCombs    = torch.nn.ModuleList(self.UpCombs)
 
-        self.fuse_hi_lo = FuseHiLo( nfilters=layer_dim_in, nfilters_embed=nfilters_embed, spatial_size=spatial_size,scales=(4,8),   norm_type = norm_type, norm_groups=norm_groups)
+        self.fuse_hi_lo = FuseHiLo( nfilters=layer_dim_in, spatial_size=spatial_size,scales=(4,8),   norm_type = norm_type, norm_groups=norm_groups)
 
     def forward(self, input_t1, input_t2):
 
