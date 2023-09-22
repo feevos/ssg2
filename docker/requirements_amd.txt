@@ -1,0 +1,15 @@
+# Requirements for local installation
+torchmetrics
+torchinfo
+albumentations
+rasterio
+earthpy
+geopandas
+pathos
+mpi4py
+pycm
+lbry-rocksdb
+opt_einsum
+einops
+ipywidgets
+pycm

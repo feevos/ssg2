@@ -1,0 +1,25 @@
+FROM nvcr.io/nvidia/pytorch:23.04-py3
+
+COPY requirements.txt /workspace/requirements.txt
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update && apt-get install -y tree 
+RUN apt-get update && apt-get install -y software-properties-common
+RUN add-apt-repository ppa:ubuntugis/ppa
+RUN apt-get update && apt-get install -y gdal-bin \  
+    libgdal-dev \ 
+    tree
+RUN pip install --upgrade pip
+
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y  #### fixes opencv-contrib installation issues 
+RUN pip install --no-cache-dir -r /workspace/requirements.txt 
+### Fix problem of jupyterlab installation
+RUN pip uninstall -y jupyterlab
+RUN pip install --no-cache-dir --pre jupyterlab-requirements
+RUN pip install --no-cache-dir --pre PyQt5
+RUN apt-get -y autoclean
+RUN pip install --no-cache-dir opencv-contrib-python==4.5.5.64 # Compatible with the internal opencv 
+RUN apt-get -y autoremove
+
+WORKDIR /workspace
+CMD ["/bin/bash"]

@@ -1,0 +1,26 @@
+# Requirements for local installation
+# Assumes nvcr.io/nvidia/pytorch:22.12-py3
+torchmetrics==0.11.4
+torchinfo
+fairscale
+####horovod ### Something weird in the installation. Works, but multiple gpus for first 2 processes. Don't get it. 
+gdal
+albumentations
+rasterio
+earthpy
+geopandas
+pathos
+mpi4py
+pycm
+##albumentations --install-option='--no-binary qudida,albumentations'  ### The latter options avoid to overwrite the opencv definitions from the ngc container
+kornia ### GPU data augmentations 
+timm ### convnext 
+lbry-rocksdb
+opt_einsum
+einops
+deepspeed
+ipywidgets
+torch-tb-profiler # enables tensorboard profiler, works nice 
+pycm
+nvitop
+higra

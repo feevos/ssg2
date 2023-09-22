@@ -1,0 +1,26 @@
+##### This is based on AMD containers 
+FROM rocm/pytorch:latest
+COPY requirements_amd.txt /workspace/requirements.txt
+
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update && apt-get install -y tree 
+RUN apt-get update && apt-get install -y software-properties-common
+RUN add-apt-repository ppa:ubuntugis/ppa
+RUN apt-get update && apt-get install -y gdal-bin \  
+    libgdal-dev 
+
+RUN pip install --upgrade pip
+# GDAL specific 
+RUN pip install --no-cache-dir gdal==$(gdal-config --version)
+
+
+RUN pip install --no-cache-dir -r /workspace/requirements.txt 
+RUN pip uninstall -y jupyterlab
+RUN pip install --no-cache-dir --pre jupyterlab-requirements
+RUN pip install --no-cache-dir --pre PyQt5
+RUN apt-get -y autoclean
+RUN apt-get -y autoremove
+
+WORKDIR /workspace
+CMD ["/bin/bash"]
