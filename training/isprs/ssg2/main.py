@@ -1,5 +1,8 @@
 # Based on multiprocessing example from
 # https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html
+import sys
+sys.path.append(r'../../../../') # location of ssg2 directory relative to main file
+
 
 from datetime import datetime
 import argparse
@@ -11,9 +14,11 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data import DataLoader
 
+from ssg2.models.ptavitssg2.ptavitssg2_dn import ptavitssg2_dn_cmtsk
 from ssg2.nn.loss.ftnmt_loss import ftnmt_loss
 from ssg2.utils.classification_metric import Classification 
-
+from ssg2.data.transform import *
+from ssg2.data.Dataset_ssg2 import * 
 
 # Debugging flag 
 DEBUG=True 
@@ -69,14 +74,14 @@ def monitor_epoch(epoch, datagen_valid, NClasses):
         # Update Metric                                                                                               
         metric_target(pred_segm,torch.argmax(label_segm,dim=1) )                                                   
 
-       # DEBUGGING OPTION
-       if DEBUG and idx > 5 : 
-           break 
+        # DEBUGGING OPTION
+        if DEBUG and idx > 5: 
+            break 
 
     # Evaluate statistics for all predictions 
     metric_kwargs_target = metric_target.compute()
 
-    kwargs{'epoch':epoch}
+    kwargs = {'epoch':epoch}
     for k,v in metric_kwargs_target.items():                               
         kwargs[k+"_target_vV"]=v.cpu().numpy() # Pass to cpu and numpy format 
 
@@ -105,15 +110,14 @@ def train(args):
                    'spatial_size_init':128,         
                    'depths':[2,2,5,2],              
                    'nfilters_init':nf,              
-                   'nfilters_embed':nf,             
                    'nheads_start':nf//4,            
                    'NClasses':NClasses,   
                    'verbose':verbose,               
                    'segm_act':'sigmoid',            
-                   'nresblocks':1}                  
+                   'nblocks3D':1}                  
  
     # UNet-like model 
-    model = ptavit(**model_config)
+    model = ptavitssg2_dn_cmtsk(**model_config).cuda()
 
     # Fractal Tanimoto with complement loss 
     criterion = ftnmt_loss()
@@ -128,8 +132,9 @@ def train(args):
     transform_train = TrainingTransform(NClasses=NClasses,mode='train')
     transform_valid = TrainingTransform(NClasses=NClasses,mode='valid')
 
-    train_dataset = = RocksDBDataset_SSG2(                                                                                                    
-                 flname_db= '../../data/isprs/TRAINING_DBs/F128/train.db', # Change here with location of your database
+    train_dataset = RocksDBDataset_SSG2(                                                                                                    
+                 #flname_db= '../../data/isprs/TRAINING_DBs/F128/train.db', # Change here with location of your database
+                 flname_db= '/scratch/pawsey0814/fdiakogiannis/data/isprs/F128/_1Hot/train.db', # PAWSEY
                  sequence_length = SequenceLength, 
                  transform=transform_train,
                  num_workers=4) # 4 is a good choice for RocksDB                                       
@@ -143,8 +148,9 @@ def train(args):
 
 
 
-    valid_dataset = = RocksDBDataset_SSG2(                                                                                                    
-                 flname_db= '../../data/isprs/TRAINING_DBs/F128/valid.db', # Change here with location of your database
+    valid_dataset = RocksDBDataset_SSG2(                                                                                                    
+                 #flname_db= '../../data/isprs/TRAINING_DBs/F128/valid.db', # Change here with location of your database
+                 flname_db= '/scratch/pawsey0814/fdiakogiannis/data/isprs/F128/_1Hot/valid.db', # PAWSEY
                  sequence_length = SequenceLength, 
                  transform=transform_valid,
                  num_workers=4) # 4 is a good choice for RocksDB                                       
@@ -255,7 +261,7 @@ def main():
     parser.add_argument('--batch-size', default=2, type=int, metavar='batch', help='batch-size')
     args = parser.parse_args()
 
-    train(args.epochs)
+    train(args)
 
 
 if __name__ == '__main__':
