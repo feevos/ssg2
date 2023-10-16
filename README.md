@@ -6,7 +6,9 @@ Official repository for our manuscript [SSG2: A New Modelling Paradigm for Seman
 
 The core of SSG2 lies in its dual-encoder, single-decoder network, which is further augmented by a sequence model. This unique architecture accepts a target image along with a collection of support images. Unlike traditional approaches that rely on single, static images, SSG2 innovates by introducing a "temporal" dimension through a sequence of observables for each static input image. Within these sequence elements, the base model predicts the set intersection, union, and difference of labels from the dual-input images. This allows for more nuanced and accurate segmentation results. 
 ![coming soon ...](.images/ssg2_overview.png)
+
 The sequence model then takes the reins, synthesizing the final segmentation mask by aggregating these partial views and filtering out noise at each sequence step. The methodology is inspired by techniques in fields like astronomy and MRI, where multiple observations are utilized to enhance data quality. It capitalizes on the strong correlation of true signals and the uncorrelated nature of noise across different sequence elements, offering a potential for statistical filtering and thereby reducing error rates. 
+
 ![coming soon ...](.images/ssg2_animation.gif)
 
 
