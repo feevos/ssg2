@@ -5,7 +5,9 @@ Official repository for our manuscript [SSG2: A New Modelling Paradigm for Seman
 
 ## Status     
 
-Un
+Under construction. Things that work:     
++ Dataset Preprocessing script for ISPRS
++ Training script for ISPRS example. 
 
 ## SSG2 brief
 
@@ -18,17 +20,17 @@ The sequence model then takes the reins, synthesizing the final segmentation mas
 ![coming soon ...](.images/ssg2_animation.gif)
 
 
-# Data     
+## Data     
 Data for the [ISPRS Potsdam and](https://www.isprs.org/education/benchmarks/UrbanSemLab/2d-sem-label-potsdam.aspx) and [ISIC 2018](https://challenge.isic-archive.com/data/#2018) need to be sourced from their official distribution sites due to licensing issues. Currently the internal dataset UrbanMonitor (Darwin, WA), is not provided. 
 
-# Software envinment    
+## Software envinment    
 Under location ```ssg2/docker``` exist instructions for both NVIDIA and ROCM Graphics accelerators (ROCM: tested with MI250 on Pawsey Setonix). Containers ready for use can be found on 
 + NVIDIA: docker pull fdiakogiannis/trchprosthesis_requirements:23.04-py3
 + AMD:  docker pull fdiakogiannis/trchprosthesis_requirements:rocm.5.6.latest.12sep2023       
 It is recommended to use these containers for your test runs. Alternatively files ssg2/docker/requirements.txt contain all libraries required for running these experiments. 
 
 
-# Data Preprocessing     
+## Data Preprocessing     
 
 We provide a RocksDB custom implementation for the case of the ISPRS Potsdam dataset. At a later stage we will also provide same functionality for the ISIC2018 dataset. See file ```ssg2/data/isprs/create_isprs_db.py```. The user needs to place in appropriate location the raw ISPRS data for this to work (or, location ```ssg2/data/isprs/DataRaw/``` in this repository. The definitions for the dataset can be found in the file ```ssg2/data/isprs/DatasetCreation_defs.py```. 
 
@@ -36,7 +38,7 @@ We provide a RocksDB custom implementation for the case of the ISPRS Potsdam dat
 
 
 
-# Training
+## Training
 
 Two examples are provided, one for the SSG2 modelling ```ssg2/training/ptavitssg2/main.py``` and another for the UNet-like run ```ssg2/training/ptavit/main.py```. These can be run with command:     
 ```torchrun --standalone --nnodes=1 --nproc_per_node=4 mnist_ddp.py```. Appropriate modifications need to take place to run in a distributed setting that relate to the custom environment of the HPC host and go beyond the purposes of this repository.                                  
