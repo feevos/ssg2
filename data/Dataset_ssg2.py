@@ -2,10 +2,9 @@
 import torch
 import sys
 sys.path.append(r'../../../')
-from ssg2.data.rocksdbutils_v2 import RocksDBReader
+from ssg2.data.rocksdbutils import RocksDBReader
 import numpy as np
 import cv2 
-from math import ceil 
 
 
 
@@ -17,7 +16,6 @@ class RocksDBDataset_SSG2(torch.utils.data.Dataset):
     # edt is good for multiclass distance transform.                                                                                    
     def __init__(self,          
                  flname_db,      
-                 flname_db_no_label,
                  sequence_length, 
                  transform=None, 
                  lru_cache=0.01, # Relates to RocksDB cache memory size 
@@ -42,8 +40,7 @@ class RocksDBDataset_SSG2(torch.utils.data.Dataset):
         self.use_identity_input = use_identity_input
 
 
-        self.length_wth_labels = ceil ( (1.-self.prob_no_label) * self.sequence_length )
-        self.length_wthout_labels = self.sequence_length - self.length_wth_labels 
+        self.length_wth_labels =  self.sequence_length 
         self.mode = mode
         assert mode in ['train','valid'], ValueError("mode can be only train or valid, aborting...")
 
@@ -236,7 +233,7 @@ class RocksDBDataset_SSG2(torch.utils.data.Dataset):
 
 
         # Random shuffle elements in sequence but PRESERVE the corresponding image / label locations within sequence.
-        c = np.arange(labels_intersection.shape[0])
+        c = np.arange(labels_intersection.shape[1])
         np.random.shuffle(c)
 
 
