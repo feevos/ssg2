@@ -1,7 +1,7 @@
 import sys
 sys.path.append(r'../../../') # Location of ssg2 repository 
 from ssg2.data.isprs.DatasetCreation_defs import *
-from ssg2.data.rocksdbutils_v2 import Rasters2RocksDB
+from ssg2.data.rocksdbutils import Rasters2RocksDB
 
 if __name__=='__main__':
  
@@ -10,8 +10,7 @@ if __name__=='__main__':
 
     
     isprs_creation_transform = DatasetCreationTransform(NClasses=NClasses, 
-            creation_transform=ISPRSNormal(),
-            representation=representation_1h)
+            creation_transform=ISPRSNormal())
 
     # Save database in location 
     flname_prefix_save = './TRAINING_DBs/F256/'

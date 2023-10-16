@@ -1,9 +1,8 @@
 from .mtsk_label import *  
 class DatasetCreationTransform(object):
-    def __init__(self,NClasses, creation_transform, representation='1Hot',compress=255.):
+    def __init__(self,NClasses, creation_transform, compress=255.):
         self.inputs_trans = creation_transform # Standardization
         self.labels_trans = MultiTaskingLabelsCreationTransform(NClasses=NClasses, 
-                                                                representation=representation,
                                                                 compress=compress)
 
         self.compress = compress
