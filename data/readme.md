@@ -26,7 +26,7 @@ OK, lets dive in, this is how one stores key (here ```b"somekey"```) value (here
 
 ```Python    
 import rocksdb     
-db = roksdb.DB("YourDataBaseName.db", rocksdb.Options(create_if_missing=True)) # Creates the Database     
+db = rocksdb.DB("YourDataBaseName.db", rocksdb.Options(create_if_missing=True)) # Creates the Database     
 db.put(b"somekey", b"SomeValue") # Store key-value pair 
 print (db.get(b"somekey")) # Retrieve store value     
 db.close() # Close database
