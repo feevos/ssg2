@@ -52,7 +52,7 @@ As a condition of this licence, you agree that where you make any adaptations, m
 
 # CITATION 
 
-If you find this work / part of this work please star our repo and cite our work: 
+If you find this work / part of this work useful please star our repo and cite our work: 
 ```
 @misc{diakogiannis2023ssg2,
       title={SSG2: A new modelling paradigm for semantic segmentation}, 
