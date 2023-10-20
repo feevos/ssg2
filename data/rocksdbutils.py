@@ -237,8 +237,13 @@ class RocksDBReader(_RocksDBBase):
             tcfinputs = self.db.get_column_family(cname)
             cname = bytes.decode(cname)
             tinputs = self.db.get( (tcfinputs, key) )
-            tinputs = np.frombuffer(tinputs, dtype= self.meta[cname]['{}_dtype'.format(cname)]).reshape(*self.meta[cname]['{}_shape'.format(cname)])
-            all_inputs.append(tinputs)
+            tshape =  self.meta[cname]['{}_shape'.format(cname)]
+            if tshape is not None:
+                tinputs = np.frombuffer(tinputs, dtype= self.meta[cname]['{}_dtype'.format(cname)]).reshape(*tshape)
+            else:
+                tinputs = np.frombuffer(tinputs, dtype= self.meta[cname]['{}_dtype'.format(cname)])
+            #all_inputs.append(tinputs.copy()) # The np.frombuffer results in a readonly array, that forces pytorch to create warnings. This is usually taken care of in transform method during training
+            all_inputs.append(tinputs) # 
 
 
         return all_inputs
