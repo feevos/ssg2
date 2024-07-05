@@ -1,13 +1,18 @@
 # SSG2: A New Modelling Paradigm for Semantic Segmentation
 
-Official repository for our manuscript [SSG2: A New Modelling Paradigm for Semantic Segmentation](https://arxiv.org/abs/2310.08671)
+Official repository for our manuscript [SSG2: A New Modelling Paradigm for Semantic Segmentation (arxiv 1st version)](https://arxiv.org/abs/2310.08671)
+
+## Update      
+The article is now published in the journal ISPRS of Photogrammetry and Remote Sensing [SSG2: A New Modelling Paradigm for Semantic Segmentation](https://www.sciencedirect.com/science/article/pii/S0924271624002491) 
 
 
 ## Status     
 
-Under construction. Things that work:     
+Things that work:     
 + Dataset Preprocessing script for ISPRS
-+ Training script for ISPRS example. 
++ Training script for ISPRS example.
++ Tutorial on RocksDB training dataset (see the readme in ```ssg2/data/```).
++ There will be minimal upgrades here (if any) now that the paper is published.    
 
 ## SSG2 brief
 
@@ -54,12 +59,16 @@ As a condition of this licence, you agree that where you make any adaptations, m
 
 If you find this work / part of this work useful please star our repo and cite our work: 
 ```
-@misc{diakogiannis2023ssg2,
-      title={SSG2: A new modelling paradigm for semantic segmentation}, 
-      author={Foivos I. Diakogiannis and Suzanne Furby and Peter Caccetta and Xiaoliang Wu and Rodrigo Ibata and Ondrej Hlinka and John Taylor},
-      year={2023},
-      eprint={2310.08671},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{DIAKOGIANNIS202444,
+	author = {Foivos I. Diakogiannis and Suzanne Furby and Peter Caccetta and Xiaoliang Wu and Rodrigo Ibata and Ondrej Hlinka and John Taylor},
+	doi = {10.1016/j.isprsjprs.2024.06.011},
+	issn = {0924-2716},
+	journal = {ISPRS Journal of Photogrammetry and Remote Sensing},
+	keywords = {Convolutional neural network, Semantic segmentation, Attention, Transformer, Vision transformer, Sequence modeling, Temporal dimension, Multitask learning, Semantic change detection},
+	pages = {44–61},
+	title = {SSG2: A new modeling paradigm for semantic segmentation},
+	url = {https://www.sciencedirect.com/science/article/pii/S0924271624002491},
+	volume = {215},
+	year = {2024}
 }
 ```
